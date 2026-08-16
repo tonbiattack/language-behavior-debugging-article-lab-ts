@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { resolveActiveDiagnostic, type DiagnosticItem } from "@/lib/diagnosticSelection";
 
 const manuscript = [
   { no: "01", text: "When readers arrive at a new interface,", kind: "plain" },
@@ -67,6 +68,7 @@ export default function Home() {
     () => filter === "all" ? findings : findings.filter((item) => item.color === filter),
     [filter],
   );
+  const diagnosticItems = findings.map(({ id, color }) => ({ id, color })) satisfies DiagnosticItem[];
 
   const runAnalysis = () => {
     setIsRunning(true);
@@ -156,7 +158,7 @@ export default function Home() {
                 <button className={activeTab === "outline" ? "tab-active" : ""} onClick={() => setActiveTab("outline")}>Outline <span>04</span></button>
               </div>
               {activeTab === "diagnostics" ? <>
-                <div className="filter-row"><div className="filter-label"><Filter size={13} /> Filter</div><div className="filter-pills">{(["all", "red", "blue", "green"] as const).map((item) => <button key={item} className={filter === item ? "filter-active" : ""} onClick={() => setFilter(item)}>{item === "all" ? "All" : item === "red" ? "Tone" : item === "blue" ? "Signal" : "Promise"}</button>)}</div></div>
+                <div className="filter-row"><div className="filter-label"><Filter size={13} /> Filter</div><div className="filter-pills">{(["all", "red", "blue", "green"] as const).map((item) => <button key={item} className={filter === item ? "filter-active" : ""} onClick={() => { setFilter(item); setActiveFinding(resolveActiveDiagnostic(diagnosticItems, item, activeFinding)); }}>{item === "all" ? "All" : item === "red" ? "Tone" : item === "blue" ? "Signal" : "Promise"}</button>)}</div></div>
                 <div className="finding-list">
                   {visibleFindings.map((finding) => <button key={finding.id} className={`finding-card ${activeFinding === finding.id ? "finding-active" : ""}`} onClick={() => setActiveFinding(finding.id)}><div className="finding-top"><span className={`finding-mark ${finding.color}`} /> <span className="finding-label">{finding.label}</span><span className="finding-location">{finding.location}</span></div><strong>{finding.title}</strong><p>{finding.detail}</p><span className="inspect-link">Inspect behavior <ChevronRight size={13} /></span></button>)}
                 </div>
