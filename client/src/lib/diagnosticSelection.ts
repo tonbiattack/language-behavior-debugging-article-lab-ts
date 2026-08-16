@@ -15,8 +15,7 @@ export function resolveActiveDiagnostic<T extends DiagnosticItem>(
   filter: DiagnosticFilter,
   activeId: string,
 ): string {
-  // BUG: the selected id is not reconciled with the filtered visible set.
-  // The panel can therefore keep showing a hidden finding as selected.
-  filterDiagnostics(items, filter);
-  return activeId;
+  const visible = filterDiagnostics(items, filter);
+  if (visible.some((item) => item.id === activeId)) return activeId;
+  return visible[0]?.id ?? "";
 }
